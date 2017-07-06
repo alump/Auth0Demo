@@ -15,6 +15,8 @@ If you want to play around with this project, you need to:
 
 There is no online demo of this application, as Auth0 API is free only for 20 days.
 
-But whyyyyyyyy, o whyyy, this is implemented like this:
+Notice that you need to add your URLs to login and logout URL allowed lists on auth0.com.
+
+More info:
 
 1. Auth0 Java APIs really want to have access to HttpServletRequest, and with Vaadin this is challenging when eg. Push (WebSocket is used). This is the reason why separate LoginUI has been made (without @Push).

@@ -42,21 +42,45 @@ public class MainView extends VerticalLayout implements View {
         addComponents(buttons, hello);
 
         Auth0Session.getCurrent().getUser().ifPresent(u -> {
+            hello.setValue("Hey " + u.getGivenName().orElse(u.getName()) + "!");
 
-            String name = u.getGivenName().orElse(u.getName());
-            hello.setValue("Hey, " + name + " logged in :)");
+            HorizontalLayout info = new HorizontalLayout();
+            info.setSpacing(true);
+            info.setWidth(100, Unit.PERCENTAGE);
+            addComponent(info);
 
-            Label userId = new Label(u.getUserId());
-            userId.setCaption("user-id");
-            addComponent(userId);
+            Component userinfo = createUserInfoGrid(u);
+            info.addComponent(userinfo);
+            userinfo.setWidth(100, Unit.PERCENTAGE);
+            info.setExpandRatio(userinfo, 1f);
 
-            u.getPicture().ifPresent(p -> {
-                Image image = new Image(null, new ExternalResource(p));
-                image.addStyleName("gravatar");
-                addComponent(image);
+            u.getPicture().ifPresent(url -> {
+                Image image = new Image(null, new ExternalResource(url));
+                image.setWidth(200, Unit.PIXELS);
+                image.setHeight(200, Unit.PIXELS);
+                info.addComponents(image);
             });
         });
 
+    }
+
+    private Component createUserInfoGrid(Auth0User user) {
+        FormLayout layout = new FormLayout();
+
+        user.getKeys().forEach(key -> {
+            try {
+                String value = user.getValue(key);
+
+                Label row = new Label(value);
+                row.setCaption(key);
+                layout.addComponent(row);
+            } catch(Exception e) {
+                System.err.println("Failed to read property " + key);
+                e.printStackTrace();
+            }
+        });
+
+        return layout;
     }
 
     private void login(Button.ClickEvent event) {

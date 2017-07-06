@@ -5,6 +5,7 @@ import com.auth0.json.auth.UserInfo;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 public class Auth0User {
 
@@ -15,7 +16,11 @@ public class Auth0User {
     }
 
     public String getValue(String key) {
-        return getValue(key, String.class);
+        return userInfo.getValues().get(key).toString();
+    }
+
+    public Set<String> getKeys() {
+        return userInfo.getValues().keySet();
     }
 
     public <T extends Object> T getValue(String key, Class<T> castTo) {
@@ -23,7 +28,7 @@ public class Auth0User {
     }
 
     public Optional<String> getOptionalValue(String key) {
-        return getOptionalValue(key, String.class);
+        return Optional.ofNullable(userInfo.getValues().get(key)).map(v -> v.toString());
     }
 
     public <T extends Object> Optional<T> getOptionalValue(String key, Class<T> castTo) {

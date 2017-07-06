@@ -2,7 +2,6 @@ package org.vaadin.alump.auth0demo;
 
 import com.auth0.AuthenticationController;
 import com.auth0.IdentityVerificationException;
-import com.auth0.SessionUtils;
 import com.auth0.Tokens;
 import com.auth0.client.auth.AuthAPI;
 import com.auth0.exception.Auth0Exception;
@@ -11,7 +10,6 @@ import com.vaadin.annotations.Theme;
 import com.vaadin.server.Page;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServletRequest;
-import com.vaadin.server.VaadinSession;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
@@ -27,13 +25,11 @@ import java.util.Properties;
 @Theme("valo")
 public class LoginUI extends UI {
 
-    private AuthenticationController authenticationController;
-
     private ProgressBar spinner;
     private Label errorLabel;
     private Label errorDescLabel;
 
-    private static Properties auth0Properties;
+    private AuthenticationController authenticationController;
 
     public LoginUI() {
         VerticalLayout layout = new VerticalLayout();
@@ -64,7 +60,7 @@ public class LoginUI extends UI {
     }
 
     public static String getLoginURL() {
-        return getAuth0Properties().getProperty("auth0.loginUrl");
+        return Auth0Session.getAuth0Properties().getProperty("auth0.loginUrl");
     }
 
     private void checkAuthentication(VaadinRequest request) {
@@ -73,7 +69,7 @@ public class LoginUI extends UI {
         try {
 
             Tokens tokens = getAuthenticationController().handle(servletRequest.getHttpServletRequest());
-            UserInfo userInfo = getAuth().userInfo(tokens.getAccessToken()).execute();
+            UserInfo userInfo = Auth0Session.getAuthAPI().userInfo(tokens.getAccessToken()).execute();
 
             Auth0Session.getCurrent().setAuth0Info(tokens, userInfo);
             Page.getCurrent().open("/", null);
@@ -100,34 +96,15 @@ public class LoginUI extends UI {
         t.printStackTrace();
     }
 
-    private static Properties getAuth0Properties() {
-        if(auth0Properties == null) {
-            Properties properties = new Properties();
-
-            try {
-                InputStream stream = Auth0Session.class.getClassLoader().getResourceAsStream(
-                        "auth0-default.properties");
-                properties.load(stream);
-            } catch(IOException e) {
-                e.printStackTrace();
-            }
-
-            try {
-                InputStream stream = Auth0Session.class.getClassLoader().getResourceAsStream("auth0.properties");
-                properties.load(stream);
-            } catch(IOException e) {
-                throw new RuntimeException("Please add missing auth0.properties file", e);
-            }
-
-            auth0Properties = properties;
-        }
-
-        return auth0Properties;
+    @Override
+    protected void init(VaadinRequest request) {
+        checkAuthentication(request);
     }
 
-    private AuthenticationController getAuthenticationController() {
+
+    protected AuthenticationController getAuthenticationController() {
         if(authenticationController == null) {
-            Properties properties = getAuth0Properties();
+            Properties properties = Auth0Session.getAuth0Properties();
             authenticationController = AuthenticationController.newBuilder(
                     properties.getProperty("auth0.domain"),
                     properties.getProperty("auth0.clientId"),
@@ -137,15 +114,4 @@ public class LoginUI extends UI {
         return authenticationController;
     }
 
-    private AuthAPI getAuth() {
-        Properties properties = getAuth0Properties();
-        return new AuthAPI(properties.getProperty("auth0.domain"),
-                properties.getProperty("auth0.clientId"),
-                properties.getProperty("auth0.clientSecret"));
-    }
-
-    @Override
-    protected void init(VaadinRequest request) {
-        checkAuthentication(request);
-    }
 }
