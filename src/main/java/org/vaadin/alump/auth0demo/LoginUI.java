@@ -59,17 +59,13 @@ public class LoginUI extends UI {
 
     }
 
-    public static String getLoginURL() {
-        return Auth0Session.getAuth0Properties().getProperty("auth0.loginUrl");
-    }
-
     private void checkAuthentication(VaadinRequest request) {
         VaadinServletRequest servletRequest = (VaadinServletRequest) request;
 
         try {
 
             Tokens tokens = getAuthenticationController().handle(servletRequest.getHttpServletRequest());
-            UserInfo userInfo = Auth0Session.getAuthAPI().userInfo(tokens.getAccessToken()).execute();
+            UserInfo userInfo = Auth0Util.resolveUser(tokens.getAccessToken());
 
             Auth0Session.getCurrent().setAuth0Info(tokens, userInfo);
             Page.getCurrent().open("/", null);
@@ -77,13 +73,13 @@ public class LoginUI extends UI {
         } catch(IdentityVerificationException e) {
             if("a0.missing_authorization_code".equals(e.getCode())) {
 
-                String url = getAuthenticationController().buildAuthorizeUrl(servletRequest, getLoginURL()).build();
+                String url = getAuthenticationController().buildAuthorizeUrl(servletRequest, Auth0Util.getLoginURL()).build();
                 Page.getCurrent().open(url, null);
 
             } else {
                 showError(e);
             }
-        } catch(Auth0Exception e) {
+        } catch(Exception e) {
             showError(e);
         }
     }
@@ -104,7 +100,7 @@ public class LoginUI extends UI {
 
     protected AuthenticationController getAuthenticationController() {
         if(authenticationController == null) {
-            Properties properties = Auth0Session.getAuth0Properties();
+            Properties properties = Auth0Util.getAuth0Properties();
             authenticationController = AuthenticationController.newBuilder(
                     properties.getProperty("auth0.domain"),
                     properties.getProperty("auth0.clientId"),

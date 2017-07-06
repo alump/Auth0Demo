@@ -7,6 +7,7 @@ import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 
 import javax.annotation.PostConstruct;
@@ -15,6 +16,9 @@ import javax.annotation.PostConstruct;
 @SpringComponent
 @Scope(value = "prototype")
 public class MainView extends VerticalLayout implements View {
+
+    @Autowired
+    private Auth0Management management;
 
     @PostConstruct
     protected void init() {
@@ -62,12 +66,27 @@ public class MainView extends VerticalLayout implements View {
             });
         });
 
+        Label mgnLabel = new Label();
+        mgnLabel.setWidth(100, Unit.PERCENTAGE);
+        addComponent(mgnLabel);
+        try {
+            if(management.isEnabled()) {
+                mgnLabel.setValue("Found " + management.getUsers().size() + " users from Auth0");
+            } else {
+                mgnLabel.setValue("Management API key not defined");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            mgnLabel.setValue("Failed to access management API");
+            mgnLabel.addStyleName(ValoTheme.LABEL_FAILURE);
+        }
+
     }
 
     private Component createUserInfoGrid(Auth0User user) {
         FormLayout layout = new FormLayout();
 
-        user.getKeys().forEach(key -> {
+        user.getKeys().stream().filter(key -> !key.equals("clientID")).forEach(key -> {
             try {
                 String value = user.getValue(key);
 

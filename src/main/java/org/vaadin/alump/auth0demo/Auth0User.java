@@ -59,6 +59,10 @@ public class Auth0User {
         return Locale.forLanguageTag(getValue("locale"));
     }
 
+    /**
+     * Unique identifier of user
+     * @return
+     */
     public String getUserId() {
         return getValue("user_id");
     }

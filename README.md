@@ -8,10 +8,11 @@ If you want to play around with this project, you need to:
 1. Register yourself as developer to Auth0
 2. Create new Client under your account
 3. Copy your **domain**, **client ID** and **client secret** from Auth0
-4. Create file ```auth0.properties``` to ```src/main/resources```, you can use ```auth0-default.properties``` as your template
-5. Compile project with ```mvn clean install```
-6. Start the Spring Boot app with ```java -jar target/Auth0Demo.jar```
-7. Go to ```http://localhost:8081``` with your browser
+4. You also need to get **management token** key **if** you want to manage your user accounts
+5. Create file ```auth0.properties``` to ```src/main/resources```, you can use ```auth0-default.properties``` as your template
+6. Compile project with ```mvn clean install```
+7. Start the Spring Boot app with ```java -jar target/Auth0Demo.jar```
+8. Go to ```http://localhost:8081``` with your browser
 
 There is no online demo of this application, as Auth0 API is free only for 20 days.
 
