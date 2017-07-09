@@ -25,7 +25,7 @@ public class Auth0DemoUI extends UI {
     protected void init(VaadinRequest request) {
         navigator.init(this, this);
         setNavigator(navigator);
-        navigator.setErrorView(MainView.class);
+        navigator.setErrorView(ErrorView.class);
     }
 
     public static Auth0DemoUI getCurrent() {

@@ -5,6 +5,7 @@ import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.SpringView;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,10 +13,12 @@ import org.springframework.context.annotation.Scope;
 
 import javax.annotation.PostConstruct;
 
-@SpringView(name = "main")
-@SpringComponent
-@Scope(value = "prototype")
+@SpringView(name = MainView.VIEW_NAME)
+@SpringComponent(MainView.VIEW_NAME)
+@UIScope
 public class MainView extends VerticalLayout implements View {
+
+    public final static String VIEW_NAME = "main";
 
     @Autowired
     private Auth0Management management;
@@ -33,7 +36,9 @@ public class MainView extends VerticalLayout implements View {
         login.setVisible(!Auth0Session.getCurrent().isLoggedIn());
         Button logout = new Button("Logout", this::logout);
         logout.setVisible(Auth0Session.getCurrent().isLoggedIn());
-        buttons.addComponents(login, logout);
+        Button tryAccess = new Button("Try access view",
+                e -> getUI().getNavigator().navigateTo(LimitedView.VIEW_NAME));
+        buttons.addComponents(login, logout, tryAccess);
 
         Auth0Session session = Auth0Session.getCurrent();
 
